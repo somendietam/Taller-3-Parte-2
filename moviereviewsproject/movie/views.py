@@ -1,7 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
-
+from .forms import CustomUserCreationForm
 from .models import Movie
+from django.contrib.auth import authenticate, login
 
 # Create your views here.
 
@@ -19,3 +20,17 @@ def home(request):
 def about(request):
     return render(request, 'about.html')
 
+def registro(request):
+    data = {
+        'form': CustomUserCreationForm()
+    }
+    if request.method == 'POST':
+        form = CustomUserCreationForm(data=request.POST)
+        if form.is_valid():
+            form.save()
+            user = authenticate(username=form.cleaned_data["username"], password = form.cleaned_data["password1"])
+            login(request, user)
+            return redirect(to = "home")
+        data["form"] = form
+
+    return render(request, 'registration/registro.html', data)
